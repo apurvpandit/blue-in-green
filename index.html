@@ -384,8 +384,8 @@ canvas { max-height: 240px; }
         <div id="funnel-signup"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Signup Conversion Rate by Method</div>
-        <div class="chart-desc">Email entry page → signed-up user conversion rate, split by sign-in method</div>
+        <div class="chart-title">Signup Conversion Rate by Method — Over Time</div>
+        <div class="chart-desc">Email entry → signed-up conversion rate trend per sign-in method</div>
         <canvas id="chart-signup-method"></canvas>
       </div>
     </div>
@@ -512,9 +512,9 @@ canvas { max-height: 240px; }
         <canvas id="chart-popup-trend"></canvas>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Submission Outcome Breakdown</div>
-        <div class="chart-desc">Of all popups shown: abandoned vs. submitted with no consent vs. submitted with ≥1 consent</div>
-        <canvas id="chart-popup-outcomes"></canvas>
+        <div class="chart-title">Popup Outcome Funnel</div>
+        <div class="chart-desc">Of all popups shown — how many users reached each outcome</div>
+        <div id="funnel-popup-main"></div>
       </div>
     </div>
 
@@ -533,9 +533,9 @@ canvas { max-height: 240px; }
 
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-title">Individual Consent Selection Rate</div>
-        <div class="chart-desc">Among all submissions (including no-consent): % where each consent option was ticked</div>
-        <canvas id="chart-popup-consent-rates"></canvas>
+        <div class="chart-title">Consent Selection Funnel</div>
+        <div class="chart-desc">Among submitted popups — opt-in rate cascade across the three consent options</div>
+        <div id="funnel-popup-consents"></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Abandonment Rate by Device</div>
@@ -842,18 +842,24 @@ funnelSteps.forEach((s, i) => {
   `;
 });
 
-/* ── SIGNUP: Conversion Rate by Method ── */
+/* ── SIGNUP: Conversion Rate by Method — Line over time ── */
 new Chart(document.getElementById('chart-signup-method'), {
-  type: 'bar',
+  type: 'line',
   data: {
-    labels: ['FIFA+ SSO', 'Direct Email', 'Google SSO', 'Facebook SSO', 'Apple SSO'],
-    datasets: [{ data: [74, 61, 68, 55, 58], backgroundColor: [C.navy, C.blue, C.red, C.blue3, C.grey], borderRadius: 4 }]
+    labels: months,
+    datasets: [
+      { label: 'FIFA+ SSO',    data: [68, 70, 72, 74, 73, 76], borderColor: C.navy,   backgroundColor: a(C.navy,  0.06), fill: false, tension: 0.4, pointRadius: 3 },
+      { label: 'Google SSO',   data: [62, 64, 66, 68, 67, 69], borderColor: C.red,    backgroundColor: a(C.red,   0.06), fill: false, tension: 0.4, pointRadius: 3 },
+      { label: 'Direct Email', data: [57, 58, 60, 61, 60, 63], borderColor: C.blue,   backgroundColor: a(C.blue,  0.06), fill: false, tension: 0.4, pointRadius: 3 },
+      { label: 'Apple SSO',    data: [53, 55, 56, 58, 57, 59], borderColor: C.grey,   backgroundColor: a(C.grey,  0.06), fill: false, tension: 0.4, pointRadius: 3 },
+      { label: 'Facebook SSO', data: [50, 52, 54, 55, 54, 56], borderColor: C.blue3,  backgroundColor: a(C.blue3, 0.06), fill: false, tension: 0.4, pointRadius: 3 },
+    ]
   },
   options: {
     responsive: true,
-    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}%` } } },
+    plugins: { legend: { position: 'bottom', labels: { font: baseFont, boxWidth: 10, padding: 12 } }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}%` } } },
     scales: {
-      y: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => v + '%' }, max: 90 },
+      y: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => v + '%' }, min: 40, max: 85 },
       x: { grid: { display: false }, ticks: { font: baseFont } }
     }
   }
@@ -893,14 +899,23 @@ new Chart(document.getElementById('chart-popup-trend'), {
   }
 });
 
-/* ── POPUP: Outcome donut ── */
-new Chart(document.getElementById('chart-popup-outcomes'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Abandoned (no submit)', 'Submitted — no consent', 'Submitted — ≥1 consent'],
-    datasets: [{ data: [31, 18, 51], backgroundColor: [C.orange, C.red, C.green], borderWidth: 0 }]
-  },
-  options: { responsive: true, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { font: baseFont, boxWidth: 10, padding: 12 } }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% of popups shown` } } } }
+/* ── POPUP: Outcome funnel ── */
+const popupFunnelSteps = [
+  { name: 'Popup shown',                       pct: 100, abs: '124K',  conv: null,                              color: C.navy   },
+  { name: 'Not abandoned — stayed to interact', pct: 69,  abs: '85.6K', conv: '69% did not close immediately',  color: C.blue   },
+  { name: 'Submitted (any selection)',           pct: 69,  abs: '85.6K', conv: '100% of those who stayed',       color: C.blue3  },
+  { name: 'Submitted — ≥1 consent given',        pct: 51,  abs: '63.2K', conv: '74% of submissions had ≥1 consent', color: C.green },
+];
+const popupFunnelEl = document.getElementById('funnel-popup-main');
+popupFunnelSteps.forEach((s, i) => {
+  popupFunnelEl.innerHTML += `
+    <div class="funnel-step">
+      <div class="funnel-row"><span class="funnel-name">${s.name}</span><span class="funnel-pct">${s.pct}% <span style="font-size:10px;font-weight:400;color:#bbb;">(${s.abs})</span></span></div>
+      <div class="funnel-track"><div class="funnel-fill" style="width:${s.pct}%;background:${s.color};"></div></div>
+      ${s.conv ? `<div class="funnel-conv">${s.conv}</div>` : ''}
+    </div>
+    ${i < popupFunnelSteps.length - 1 ? '<div class="funnel-arrow">▼</div>' : ''}
+  `;
 });
 
 /* ── POPUP: By Device ── */
@@ -938,21 +953,23 @@ new Chart(document.getElementById('chart-popup-country'), {
   }
 });
 
-/* ── POPUP: Individual consent selection rates ── */
-new Chart(document.getElementById('chart-popup-consent-rates'), {
-  type: 'bar',
-  data: {
-    labels: ['DAZN Marketing', 'FIFA Marketing', 'FIFA Data Sharing'],
-    datasets: [{ data: [38, 29, 24], backgroundColor: [C.navy, C.blue, C.blue3], borderRadius: 4 }]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% of all submissions` } } },
-    scales: {
-      y: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => v+'%' }, max: 55 },
-      x: { grid: { display: false }, ticks: { font: baseFont } }
-    }
-  }
+/* ── POPUP: Consent selection cascade funnel ── */
+const consentFunnelSteps = [
+  { name: 'Submitted (any)',              pct: 100, abs: '85.6K', conv: null,                                     color: C.blue  },
+  { name: 'DAZN Marketing consent ticked', pct: 55,  abs: '47.1K', conv: '55% of submissions ticked DAZN marketing', color: C.navy  },
+  { name: 'FIFA Marketing consent ticked', pct: 42,  abs: '36.0K', conv: '42% of submissions ticked FIFA marketing',  color: C.blue3 },
+  { name: 'FIFA Data Sharing ticked',      pct: 35,  abs: '30.0K', conv: '35% of submissions ticked data sharing',    color: C.teal  },
+];
+const consentFunnelEl = document.getElementById('funnel-popup-consents');
+consentFunnelSteps.forEach((s, i) => {
+  consentFunnelEl.innerHTML += `
+    <div class="funnel-step">
+      <div class="funnel-row"><span class="funnel-name">${s.name}</span><span class="funnel-pct">${s.pct}% <span style="font-size:10px;font-weight:400;color:#bbb;">(${s.abs})</span></span></div>
+      <div class="funnel-track"><div class="funnel-fill" style="width:${s.pct}%;background:${s.color};"></div></div>
+      ${s.conv ? `<div class="funnel-conv">${s.conv}</div>` : ''}
+    </div>
+    ${i < consentFunnelSteps.length - 1 ? '<div class="funnel-arrow">▼</div>' : ''}
+  `;
 });
 
 /* ── POPUP: Abandonment rate by device ── */
