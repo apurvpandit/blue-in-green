@@ -193,6 +193,7 @@ canvas { max-height: 240px; }
   <div class="tab" onclick="switchTab('ma', this)">MA &amp; Confederation</div>
   <div class="tab" onclick="switchTab('signup', this)">Signup Conversion</div>
   <div class="tab" onclick="switchTab('navdepth', this)">Navigation Depth</div>
+  <div class="tab" onclick="switchTab('popup', this)">Tile Consent Popup</div>
 </div>
 
 <div class="content">
@@ -259,6 +260,19 @@ canvas { max-height: 240px; }
         <canvas id="chart-home-rail"></canvas>
       </div>
     </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Rail Scroll Interactions by Rail</div>
+        <div class="chart-desc">Avg number of left/right scroll interactions per session within each rail</div>
+        <canvas id="chart-home-rail-scrolls"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tile Position Clicks (across all rails)</div>
+        <div class="chart-desc">% of all tile clicks by tile position within a rail — shows how far right users click</div>
+        <canvas id="chart-home-tile-position"></canvas>
+      </div>
+    </div>
   </div>
 
   <!-- ======================================================= -->
@@ -318,6 +332,12 @@ canvas { max-height: 240px; }
         <canvas id="chart-sched-tiles"></canvas>
       </div>
     </div>
+
+    <div class="chart-card full" style="margin-bottom:20px;">
+      <div class="chart-title">Top Fixtures by Tile Clicks</div>
+      <div class="chart-desc">Ranked list of individual fixtures by number of tile click selections in this period</div>
+      <div id="ranked-fixtures" style="margin-top:4px;"></div>
+    </div>
   </div>
 
   <!-- ======================================================= -->
@@ -357,6 +377,19 @@ canvas { max-height: 240px; }
         <div class="chart-title">Rail BAU Metrics by Page Type</div>
         <div class="chart-desc">Impressions and clicks across MA / Confederation / Archive / Originals / All MA</div>
         <canvas id="chart-ma-rail"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Rail Scroll Interactions by Page Type</div>
+        <div class="chart-desc">Avg left/right scroll interactions per session within rails, by page type</div>
+        <canvas id="chart-ma-rail-scrolls"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tile Position Clicks (across all MA rails)</div>
+        <div class="chart-desc">% of all tile clicks by tile position within a rail across MA / Confederation pages</div>
+        <canvas id="chart-ma-tile-position"></canvas>
       </div>
     </div>
   </div>
@@ -461,6 +494,79 @@ canvas { max-height: 240px; }
         <div class="chart-title">Drop-off by Page (Non-playing exits)</div>
         <div class="chart-desc">Ranked list of FIFA+ pages where non-playing users most frequently leave</div>
         <div id="ranked-dropoff"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- TILE CONSENT POPUP TAB                                   -->
+  <!-- ======================================================= -->
+  <div class="tab-panel" id="panel-popup">
+    <div class="section-header">
+      <h2>Tile Consent Popup</h2>
+      <p>Shown to existing logged-in users when they tap a FIFA+ tile — tracks popup volume, abandonment, and consent submission outcomes</p>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Popups Shown</div>
+        <div class="kpi-value">124K</div>
+        <div class="kpi-sub">last 30 days</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Abandonment Rate</div>
+        <div class="kpi-value" style="color:#e67e22">31%</div>
+        <div class="kpi-sub">closed without submitting</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Submitted — No Consent</div>
+        <div class="kpi-value" style="color:#e74c3c">18%</div>
+        <div class="kpi-sub">submitted with nothing selected</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Submitted — ≥1 Consent</div>
+        <div class="kpi-value" style="color:#27ae60">51%</div>
+        <div class="kpi-sub">submitted with at least one option</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Popups Shown — Trend</div>
+        <div class="chart-desc">Total tile consent popup impressions over time</div>
+        <canvas id="chart-popup-trend"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Submission Outcome Breakdown</div>
+        <div class="chart-desc">Of all popups shown: abandoned vs. submitted with no consent vs. submitted with ≥1 consent</div>
+        <canvas id="chart-popup-outcomes"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Popups Shown by Device</div>
+        <div class="chart-desc">Total popup impressions split by device type</div>
+        <canvas id="chart-popup-device"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Popups Shown by Country</div>
+        <div class="chart-desc">Top countries by popup impression volume</div>
+        <canvas id="chart-popup-country"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Individual Consent Selection Rate</div>
+        <div class="chart-desc">Among all submissions (including no-consent): % where each consent option was ticked</div>
+        <canvas id="chart-popup-consent-rates"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Abandonment Rate by Device</div>
+        <div class="chart-desc">% of popups abandoned (closed without submitting) per device type</div>
+        <canvas id="chart-popup-abandon-device"></canvas>
       </div>
     </div>
   </div>
@@ -613,6 +719,40 @@ new Chart(document.getElementById('chart-sched-filters'), {
   }
 });
 
+/* ── HOME: Rail Scroll Interactions ── */
+new Chart(document.getElementById('chart-home-rail-scrolls'), {
+  type: 'bar',
+  data: {
+    labels: ['Rail 1', 'Rail 2', 'Rail 3', 'Rail 4', 'Rail 5'],
+    datasets: [{ label: 'Avg scroll interactions / session', data: [1.2, 2.1, 2.8, 3.4, 3.9], backgroundColor: a(C.navy, 0.65), borderRadius: 3 }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw} avg scrolls/session` } } },
+    scales: {
+      y: { grid: { color: gridCol }, ticks: { font: baseFont }, max: 5 },
+      x: { grid: { display: false }, ticks: { font: baseFont } }
+    }
+  }
+});
+
+/* ── HOME: Tile Position Clicks ── */
+new Chart(document.getElementById('chart-home-tile-position'), {
+  type: 'bar',
+  data: {
+    labels: ['Pos 1', 'Pos 2', 'Pos 3', 'Pos 4', 'Pos 5', 'Pos 6+'],
+    datasets: [{ data: [38, 24, 16, 10, 7, 5], backgroundColor: [C.navy, C.blue, C.blue3, a(C.blue3,0.8), a(C.grey,0.9), C.grey], borderRadius: 3 }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% of tile clicks` } } },
+    scales: {
+      y: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => v+'%' }, max: 45 },
+      x: { grid: { display: false }, ticks: { font: baseFont } }
+    }
+  }
+});
+
 /* ── SCHEDULE: Tile Clicks by Fixture Type ── */
 new Chart(document.getElementById('chart-sched-tiles'), {
   type: 'doughnut',
@@ -622,6 +762,27 @@ new Chart(document.getElementById('chart-sched-tiles'), {
   },
   options: { responsive: true, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { font: baseFont, boxWidth: 10, padding: 12 } } } }
 });
+
+/* ── SCHEDULE: Top Fixtures ranked list ── */
+const fixtureData = [
+  { name: 'Brazil vs Argentina — CONMEBOL Qualifier',     clicks: 18400 },
+  { name: 'England vs France — UEFA Nations League',      clicks: 15200 },
+  { name: 'Morocco vs Senegal — AFCON Group Stage',       clicks: 12800 },
+  { name: 'Japan vs South Korea — AFC Asian Cup',         clicks: 11300 },
+  { name: 'Germany vs Spain — UEFA Nations League',       clicks: 10700 },
+  { name: 'Mexico vs USA — CONCACAF Nations League',      clicks:  9400 },
+  { name: 'Portugal vs Netherlands — UEFA Nations League',clicks:  8100 },
+  { name: 'Nigeria vs Ghana — AFCON Group Stage',         clicks:  7600 },
+];
+const fixtureMax = fixtureData[0].clicks;
+document.getElementById('ranked-fixtures').innerHTML = fixtureData.map((f, i) => `
+  <div class="ranked-item">
+    <div class="rank-num">${i + 1}</div>
+    <div class="rank-name">${f.name}</div>
+    <div class="rank-track" style="flex:0 0 200px;"><div class="rank-fill" style="width:${(f.clicks/fixtureMax)*100}%;background:${C.blue};"></div></div>
+    <div class="rank-val" style="color:${C.blue};width:50px;">${(f.clicks/1000).toFixed(1)}K</div>
+  </div>
+`).join('');
 
 /* ── MA: Entry Source ── */
 new Chart(document.getElementById('chart-ma-source'), {
@@ -648,6 +809,40 @@ new Chart(document.getElementById('chart-ma-rail'), {
     plugins: { legend: { position: 'bottom', labels: { font: baseFont, boxWidth: 10, padding: 12 } } },
     scales: {
       y: { grid: { color: gridCol }, ticks: { font: baseFont } },
+      x: { grid: { display: false }, ticks: { font: baseFont } }
+    }
+  }
+});
+
+/* ── MA: Rail Scroll Interactions ── */
+new Chart(document.getElementById('chart-ma-rail-scrolls'), {
+  type: 'bar',
+  data: {
+    labels: ['Member Assoc.', 'Confederation', 'Archive', 'Originals', 'All MA'],
+    datasets: [{ label: 'Avg scroll interactions / session', data: [2.3, 2.0, 1.6, 1.8, 1.4], backgroundColor: a(C.teal, 0.75), borderRadius: 3 }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw} avg scrolls/session` } } },
+    scales: {
+      y: { grid: { color: gridCol }, ticks: { font: baseFont }, max: 4 },
+      x: { grid: { display: false }, ticks: { font: baseFont } }
+    }
+  }
+});
+
+/* ── MA: Tile Position Clicks ── */
+new Chart(document.getElementById('chart-ma-tile-position'), {
+  type: 'bar',
+  data: {
+    labels: ['Pos 1', 'Pos 2', 'Pos 3', 'Pos 4', 'Pos 5', 'Pos 6+'],
+    datasets: [{ data: [41, 26, 15, 9, 6, 3], backgroundColor: [C.teal, a(C.teal,0.85), a(C.teal,0.70), a(C.teal,0.55), a(C.teal,0.40), C.grey], borderRadius: 3 }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% of tile clicks` } } },
+    scales: {
+      y: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => v+'%' }, max: 50 },
       x: { grid: { display: false }, ticks: { font: baseFont } }
     }
   }
@@ -702,6 +897,102 @@ new Chart(document.getElementById('chart-nav-trend'), {
     plugins: { legend: { display: false } },
     scales: {
       y: { grid: { color: gridCol }, ticks: { font: baseFont }, min: 1.5, max: 3.5 },
+      x: { grid: { display: false }, ticks: { font: baseFont } }
+    }
+  }
+});
+
+/* ── POPUP: Trend ── */
+new Chart(document.getElementById('chart-popup-trend'), {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [{ label: 'Popups shown', data: [18400, 20100, 21800, 22600, 20900, 20200], borderColor: C.purple, backgroundColor: a(C.purple, 0.07), fill: true, tension: 0.4, pointRadius: 3 }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => (v/1000).toFixed(0)+'K' } },
+      x: { grid: { display: false }, ticks: { font: baseFont } }
+    }
+  }
+});
+
+/* ── POPUP: Outcome donut ── */
+new Chart(document.getElementById('chart-popup-outcomes'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Abandoned (no submit)', 'Submitted — no consent', 'Submitted — ≥1 consent'],
+    datasets: [{ data: [31, 18, 51], backgroundColor: [C.orange, C.red, C.green], borderWidth: 0 }]
+  },
+  options: { responsive: true, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { font: baseFont, boxWidth: 10, padding: 12 } }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% of popups shown` } } } }
+});
+
+/* ── POPUP: By Device ── */
+new Chart(document.getElementById('chart-popup-device'), {
+  type: 'bar',
+  data: {
+    labels: ['Web', 'Mobile', 'Connected TV'],
+    datasets: [{ data: [54000, 58000, 12000], backgroundColor: [C.navy, C.purple, C.teal], borderRadius: 4 }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${(ctx.raw/1000).toFixed(0)}K popups` } } },
+    scales: {
+      y: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => (v/1000).toFixed(0)+'K' } },
+      x: { grid: { display: false }, ticks: { font: baseFont } }
+    }
+  }
+});
+
+/* ── POPUP: By Country ── */
+new Chart(document.getElementById('chart-popup-country'), {
+  type: 'bar',
+  data: {
+    labels: ['United Kingdom', 'Germany', 'Spain', 'Italy', 'Japan', 'United States', 'France', 'Mexico'],
+    datasets: [{ data: [28000, 22000, 18000, 16000, 14000, 11000, 9000, 6000], backgroundColor: a(C.purple, 0.75), borderRadius: 3 }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${(ctx.raw/1000).toFixed(0)}K popups` } } },
+    scales: {
+      x: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => (v/1000).toFixed(0)+'K' } },
+      y: { grid: { display: false }, ticks: { font: baseFont } }
+    }
+  }
+});
+
+/* ── POPUP: Individual consent selection rates ── */
+new Chart(document.getElementById('chart-popup-consent-rates'), {
+  type: 'bar',
+  data: {
+    labels: ['DAZN Marketing', 'FIFA Marketing', 'FIFA Data Sharing'],
+    datasets: [{ data: [38, 29, 24], backgroundColor: [C.navy, C.blue, C.blue3], borderRadius: 4 }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% of all submissions` } } },
+    scales: {
+      y: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => v+'%' }, max: 55 },
+      x: { grid: { display: false }, ticks: { font: baseFont } }
+    }
+  }
+});
+
+/* ── POPUP: Abandonment rate by device ── */
+new Chart(document.getElementById('chart-popup-abandon-device'), {
+  type: 'bar',
+  data: {
+    labels: ['Web', 'Mobile', 'Connected TV'],
+    datasets: [{ data: [27, 33, 44], backgroundColor: [a(C.orange, 0.7), C.orange, C.red], borderRadius: 4 }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% abandoned` } } },
+    scales: {
+      y: { grid: { color: gridCol }, ticks: { font: baseFont, callback: v => v+'%' }, max: 60 },
       x: { grid: { display: false }, ticks: { font: baseFont } }
     }
   }
